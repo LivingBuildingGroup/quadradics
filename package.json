@@ -1,0 +1,24 @@
+{
+  "name": "quadratics",
+  "version": "1.0.0",
+  "description": "Javascript functions for quadratic equations",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm run test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bradcgarner/quadradics.git"
+  },
+  "keywords": [
+    "javascript",
+    "quadratic",
+    "regression"
+  ],
+  "author": "Brad C. Garner",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/bradcgarner/quadradics/issues"
+  },
+  "homepage": "https://github.com/bradcgarner/quadradics#readme"
+}
