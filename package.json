@@ -1,6 +1,6 @@
 {
   "name": "quadratics",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Javascript functions for quadratic equations",
   "main": "index.js",
   "scripts": {
