@@ -1,4 +1,6 @@
-const { isPrimitiveNumber } = require('conjunction-junction');
+const { 
+	isPrimitiveNumber,
+  precisionRound     } = require('conjunction-junction');
 
 /**
 * Determine the coefficient of determination (r^2) of a fit from the observations

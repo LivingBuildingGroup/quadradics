@@ -2,7 +2,8 @@
 
 var _require = require('conjunction-junction');
 
-const isPrimitiveNumber = _require.isPrimitiveNumber;
+const isPrimitiveNumber = _require.isPrimitiveNumber,
+      precisionRound = _require.precisionRound;
 
 /**
 * Determine the coefficient of determination (r^2) of a fit from the observations
