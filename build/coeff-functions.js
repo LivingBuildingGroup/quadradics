@@ -101,32 +101,32 @@ const createCoeffKey = (rows, complete, parser, type) => {
         }
       }
     });
-    if (!coeffs[join.join_type]) {
-      coeffs[join.join_type] = {};
+    if (!coeffs[join.joinType]) {
+      coeffs[join.joinType] = {};
     }
-    if (Array.isArray(join.names_versions)) {
-      join.names_versions.forEach(v => {
-        if (!coeffs[join.join_type][v]) {
-          coeffs[join.join_type][v] = {};
+    if (Array.isArray(join.namesVersions)) {
+      join.namesVersions.forEach(v => {
+        if (!coeffs[join.joinType][v]) {
+          coeffs[join.joinType][v] = {};
         }
-        if (!coeffs[join.join_type][v][join.profile_code]) {
-          coeffs[join.join_type][v][join.profile_code] = {};
+        if (!coeffs[join.joinType][v][join.profileCode]) {
+          coeffs[join.joinType][v][join.profileCode] = {};
         }
         const boilerplate = {
-          namesVersions: join.names_versions,
-          joinType: join.join_type,
+          namesVersions: join.namesVersions,
+          joinType: join.joinType,
           notes: join.notes,
           string: stringifyCoeff(coeff)
         };
         if (complete) {
           boilerplate.id = join.id;
-          boilerplate.timestampCreated = join.timestamp_created;
-          boilerplate.profileCode = join.profile_code;
-          boilerplate.idJoin = join.id_join;
-          boilerplate.idTestLo = join.id_test_lo;
-          boilerplate.idTestHi = join.id_test_hi;
+          boilerplate.timestampCreated = join.timestampCreated;
+          boilerplate.profileCode = join.profileCode;
+          boilerplate.idJoin = join.idJoin;
+          boilerplate.idTestLo = join.idTestLo;
+          boilerplate.idTestHi = join.idTestHi;
         }
-        coeffs[join.join_type][v][join.profile_code][coeff.functionType] = Object.assign({}, coeff, boilerplate);
+        coeffs[join.joinType][v][join.profileCode][coeff.functionType] = Object.assign({}, coeff, boilerplate);
       });
     }
   });
@@ -145,13 +145,18 @@ const baseCodesToTry = [
 // HC thickness max is 80mm (so only 0mm to 80mm range)
 // more than max = max
 'profileCode10T', // best fit
-'profile_code_10_t', // same snake
-'profileCode20T', // ok fit
-'profile_code_20_t'];
+// 'profile_code_10_t', // same snake
+'profileCode20T'];
 
 const profileCodesToTry = ['profileCodeExact', // best fit
-'profile_code_exact', 'profileCodeExactNvg', 'profile_code_exact_nvg', 'profileCode5Nvg', 'profile_code_5_nvg', 'profileCode10Nvg', 'profile_code_10_nvg', 'profileCode20Nvg', // ok fit
-'profile_code_20_nvg'];
+// 'profile_code_exact',
+'profileCodeExactNvg',
+// 'profile_code_exact_nvg',
+'profileCode5Nvg',
+// 'profile_code_5_nvg',
+'profileCode10Nvg',
+// 'profile_code_10_nvg',
+'profileCode20Nvg'];
 
 const profileCodesToTryByJoinTypes = {
   iFromQ: baseCodesToTry,

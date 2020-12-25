@@ -15,7 +15,7 @@ const calcNse = input => {
         predictKeyY = input.predictKeyY,
         indexStart = input.indexStart,
         indexEnd = input.indexEnd,
-        runoff_trans_mean_mm = input.runoff_trans_mean_mm;
+        runoffDrainMeanMm = input.runoffDrainMeanMm;
 
 
   if (!Array.isArray(dataType1WithPrediction)) {
@@ -35,7 +35,7 @@ const calcNse = input => {
     const predict = d ? d[predictKeyY] : null;
     // Math.pow is (value, power)
     const numerator = Math.pow(predict - observe, 2);
-    const denominator = Math.pow(observe - runoff_trans_mean_mm, 2);
+    const denominator = Math.pow(observe - runoffDrainMeanMm, 2);
     numeratorPriorSum = numerator + numeratorPriorSum;
     denominatorPriorSum = denominator + denominatorPriorSum;
     return {
