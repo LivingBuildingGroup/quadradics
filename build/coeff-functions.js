@@ -79,14 +79,14 @@ const stringifyCoeff = data => {
   return 'Error: unable to read function!';
 };
 
-const createCoeffKey = (raw, complete, parser, type) => {
+const createCoeffKey = (rows, complete, parser, type) => {
   const coeffs = {};
 
-  if (!raw || !Array.isArray(raw.rows)) {
+  if (!Array.isArray(rows)) {
     return coeffs;
   }
 
-  raw.rows.forEach(join => {
+  rows.forEach(join => {
 
     const value = join.value;
 

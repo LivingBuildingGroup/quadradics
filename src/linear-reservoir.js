@@ -1,6 +1,8 @@
 'use strict';
 
-const { isPrimitiveNumber,
+const { 
+  isPrimitiveNumber,
+  titleCaseWord,
   precisionRound } = require('conjunction-junction');
 const math         = require('mathjs');
 const { calcNse }  = require('./nse');
@@ -24,14 +26,14 @@ const getFlowStats = input => {
   const dataSliced = Array.isArray(dataType1WithPrediction) ?
     dataType1WithPrediction.slice(indexStart, indexEnd) : [];   
 
-  let runoff_trans_mm_total_predict = 0;
-  let runoff_trans_mm_total  = 0;
-  let runoff_trans_peak_rate_mm_predict  = 0;
-  let runoff_trans_peak_rate_mm   = 0;
-  let runoff_trans_mean_mm_predict  = 0;
-  let runoff_trans_mean_mm   = 0;
-  let absorb_peak_mm_total = 0;
-  let absorb_peak_mm_total_predict = 0;
+  let runoffDrainMmTotalPredict = 0;
+  let runoffDrainMmTotal  = 0;
+  let runoffDrainPeakRateMmPredict  = 0;
+  let runoffDrainPeakRateMm   = 0;
+  let runoffDrainMeanMmPredict  = 0;
+  let runoffDrainMeanMm   = 0;
+  let absorbPeakMmTotal = 0;
+  let absorbPeakMmTotalPredict = 0;
 
   // console.log('dataSliced',dataSliced)
   const flowMeanArr = dataSliced.map((d,i)=>{
@@ -49,19 +51,19 @@ const getFlowStats = input => {
     const mmObserve = precisionRound(mmHrObserve/60,4);
     const mmPredict = precisionRound(mmHrPredict/60,4);
       
-    runoff_trans_peak_rate_mm  = Math.max(runoff_trans_peak_rate_mm, mmObserve);
-    runoff_trans_peak_rate_mm_predict = Math.max(runoff_trans_peak_rate_mm_predict, mmPredict);
+    runoffDrainPeakRateMm  = Math.max(runoffDrainPeakRateMm, mmObserve);
+    runoffDrainPeakRateMmPredict = Math.max(runoffDrainPeakRateMmPredict, mmPredict);
 
-    runoff_trans_mm_total_predict += mmPredict;
-    runoff_trans_mm_total  += mmObserve;
+    runoffDrainMmTotalPredict += mmPredict;
+    runoffDrainMmTotal  += mmObserve;
 
     const mmAbsorbObserve = d && isPrimitiveNumber(d[observeKeyX]) ?
       d[observeKeyX] : 0;
     const mmAbsorbPredict = d && isPrimitiveNumber(d[predictKeyX]) ?
       d[predictKeyX] : 0;
 
-    absorb_peak_mm_total = Math.max(absorb_peak_mm_total, mmAbsorbObserve);
-    absorb_peak_mm_total_predict = Math.max(absorb_peak_mm_total_predict, mmAbsorbPredict);
+    absorbPeakMmTotal = Math.max(absorbPeakMmTotal, mmAbsorbObserve);
+    absorbPeakMmTotalPredict = Math.max(absorbPeakMmTotalPredict, mmAbsorbPredict);
 
     return {
       mmObserve, 
@@ -73,23 +75,23 @@ const getFlowStats = input => {
   const flowMeanPredictArr = flowMeanArr.map(d=>d.mmPredict);
 
   // console.log('subset',subset,'flowMeanArr [mmObserve, mmPredict]',flowMeanArr);
-  runoff_trans_mean_mm         = flowMeanObserveArr.length>0 ?
+  runoffDrainMeanMm         = flowMeanObserveArr.length>0 ?
     math.mean(flowMeanObserveArr) : NaN ;
-  runoff_trans_mean_mm_predict = flowMeanPredictArr.length>0 ?
+  runoffDrainMeanMmPredict = flowMeanPredictArr.length>0 ?
     math.mean(flowMeanPredictArr) : NaN ;
 
   return {
-    runoff_trans_mm_total,
-    runoff_trans_mm_total_predict,
+    runoffDrainMmTotal,
+    runoffDrainMmTotalPredict,
 
-    runoff_trans_peak_rate_mm,
-    runoff_trans_peak_rate_mm_predict,
+    runoffDrainPeakRateMm,
+    runoffDrainPeakRateMmPredict,
 
-    runoff_trans_mean_mm,
-    runoff_trans_mean_mm_predict,
+    runoffDrainMeanMm,
+    runoffDrainMeanMmPredict,
 
-    absorb_peak_mm_total,
-    absorb_peak_mm_total_predict,
+    absorbPeakMmTotal,
+    absorbPeakMmTotalPredict,
   };
 };
 
@@ -108,8 +110,8 @@ const calcObserveRegression = input => {
     regressionFunction,
   } = input;
 
-  const predictKeyY = `${observeKeyY}_${regressionMethod}_${subset ? `${subset}`: 'all'}`; // change this on the server IF we want to save it
-  const predictKeyX = `${observeKeyX}_${regressionMethod}_${subset ? `${subset}`: 'all'}`; // change this on the server IF we want to save it
+  const predictKeyY = `${observeKeyY}${titleCaseWord(regressionMethod)}${subset ? `${titleCaseWord(subset)}`: 'All'}`; // change this on the server IF we want to save it
+  const predictKeyX = `${observeKeyX}${titleCaseWord(regressionMethod)}${subset ? `${titleCaseWord(subset)}`: 'All'}`; // change this on the server IF we want to save it
 
   const {
     indexStart,
@@ -153,14 +155,14 @@ const calcObserveRegression = input => {
   });
 
   const {
-    runoff_trans_mm_total,
-    runoff_trans_mm_total_predict,
+    runoffDrainMmTotal,
+    runoffDrainMmTotalPredict,
 
-    runoff_trans_peak_rate_mm,
-    runoff_trans_peak_rate_mm_predict,
+    runoffDrainPeakRateMm,
+    runoffDrainPeakRateMmPredict,
 
-    runoff_trans_mean_mm,
-    runoff_trans_mean_mm_predict,
+    runoffDrainMeanMm,
+    runoffDrainMeanMmPredict,
   } = getFlowStats({
     regressionMethod,
     dataType1WithPrediction, 
@@ -178,12 +180,12 @@ const calcObserveRegression = input => {
     predictKeyY,
     indexStart,
     indexEnd,
-    runoff_trans_mean_mm,
+    runoffDrainMeanMm,
   });
 
   const observeRegression = {
     subset, 
-    regression_method: regressionMethod,
+    regressionMethod: regressionMethod,
 
     messages, // messages about start and end
     indexStart,
@@ -192,27 +194,27 @@ const calcObserveRegression = input => {
     k:  regressionResult.k,
     n:  regressionResult.n,
     r2: regressionResult.r2,
-    regression_string: regressionResult.string,
+    regressionString: regressionResult.string,
     
-    observe_key_x: observeKeyX,
-    absorb_peak_mm_total: '',
-    absorb_peak_mm_total_predict: '',
-    predict_key_x: predictKeyX,
+    observeKeyX: observeKeyX,
+    absorbPeakMmTotal: '',
+    absorbPeakMmTotalPredict: '',
+    predictKeyX: predictKeyX,
 
-    observe_key_y: observeKeyY,
-    runoff_trans_mm_total,
-    runoff_trans_mm_total_predict,
-    predict_key_y: predictKeyY,
+    observeKeyY: observeKeyY,
+    runoffDrainMmTotal,
+    runoffDrainMmTotalPredict,
+    predictKeyY: predictKeyY,
 
-    runoff_trans_peak_rate_mm,
-    runoff_trans_peak_rate_mm_predict,
+    runoffDrainPeakRateMm,
+    runoffDrainPeakRateMmPredict,
       
-    runoff_trans_mean_mm,
-    runoff_trans_mean_mm_predict,
+    runoffDrainMeanMm,
+    runoffDrainMeanMmPredict,
 
     nse,
 
-    points_raw: regressionResult.points,
+    pointsRaw: regressionResult.points,
     dataType1WithPrediction,
     predict: regressionResult.predict,
   };
@@ -232,20 +234,20 @@ const predictLinearReservoirFromRegression = (settings, observeRegression) => {
     k,
     n,
     r2,
-    regression_string,
+    regressionString,
     
-    observe_key_x, // absorb_delta_mm_total
-    observe_key_y, // runoff_trans_mm_hr
+    observeKeyX, // absorbDeltaMmTotal
+    observeKeyY, // runoffDrainMmHr
 
     predict,
   } = observeRegression;
 
   const regressionMethod = 'predict';
-  const predict_key_y = `${observe_key_y}_${regressionMethod}_${subset ? `${subset}`: 'all'}`; // change this on the server IF we want to save it
-  const predict_key_x = `${observe_key_x}_${regressionMethod}_${subset ? `${subset}`: 'all'}`; // change this on the server IF we want to save it
+  const predictKeyY = `${observeKeyY}${titleCaseWord(regressionMethod)}${titleCaseWord(subset) ? `${subset}`: 'All'}`; // change this on the server IF we want to save it
+  const predictKeyX = `${observeKeyX}${titleCaseWord(regressionMethod)}${titleCaseWord(subset) ? `${subset}`: 'All'}`; // change this on the server IF we want to save it
 
-  const runoff_trans_mm_total_key = `runoff_trans_mm_total_${regressionMethod}_${subset ? `${subset}`: 'all'}`;
-  const runoff_sheet_mm_total_key = `runoff_sheet_mm_total_${regressionMethod}_${subset ? `${subset}`: 'all'}`;
+  const runoffDrainMmTotalKey = `runoffDrainMmTotal${titleCaseWord(regressionMethod)}${subset ? `${titleCaseWord(subset)}`: 'All'}`;
+  const runoffSheetMmTotalKey = `runoffSheetMmTotal${titleCaseWord(regressionMethod)}${subset ? `${titleCaseWord(subset)}`: 'All'}`;
 
   let priorInc = {};
   const dataType1WithPrediction = Array.isArray(dataType1) ?
@@ -253,62 +255,62 @@ const predictLinearReservoirFromRegression = (settings, observeRegression) => {
       if(i===0){
         const inc = {
           metadata: {
-            observe_key_x,
-            observe_key_y,
-            predict_key_x,
-            predict_key_y,
-            runoff_trans_mm_total_key,
-            runoff_sheet_mm_total_key,
+            observeKeyX,
+            observeKeyY,
+            predictKeyX,
+            predictKeyY,
+            runoffDrainMmTotalKey,
+            runoffSheetMmTotalKey,
           },
-          rain_mm: d.rain_mm,
-          mins_total: d.mins_total,
-          [observe_key_x]: d[observe_key_x],
-          [observe_key_y]: d[observe_key_y],          
-          [predict_key_x]: d[observe_key_x], // absorb_delta_mm_total initial should be 0
-          [predict_key_y]: d[observe_key_y], // runoff_trans_mm_hr
-          [runoff_trans_mm_total_key] : d.runoff_trans_mm_total, // runoff_trans_mm_total
-          [runoff_sheet_mm_total_key] : d.runoff_sheet_mm_total, // runoff_sheet_mm_total
+          rainMm: d.rainMm,
+          minsTotal: d.minsTotal,
+          [observeKeyX]: d[observeKeyX],
+          [observeKeyY]: d[observeKeyY],          
+          [predictKeyX]: d[observeKeyX], // absorbDeltaMmTotal initial should be 0
+          [predictKeyY]: d[observeKeyY], // runoffDrainMmHr
+          [runoffDrainMmTotalKey] : d.runoffDrainMmTotal, // runoffDrainMmTotal
+          [runoffSheetMmTotalKey] : d.runoffSheetMmTotal, // runoffSheetMmTotal
         };
         priorInc = inc;
         return inc;
       } else {
-        const runoff_trans_mm_hr_arr = predict(priorInc[predict_key_x]);
-        const runoff_trans_mm_hr = runoff_trans_mm_hr_arr[1] || 0;
-        const runoff_trans_mm = runoff_trans_mm_hr / 60;
-        const runoff_sheet_mm = 0;
+        const runoffDrainMmHrArr = predict(priorInc[predictKeyX]);
+        const runoffDrainMmHr = runoffDrainMmHrArr[1] || 0;
+        const runoffDrainMm = runoffDrainMmHr / 60;
+        const runoffSheetMm = 0;
         const storage = 
-          priorInc[predict_key_x] + 
-          d.rain_mm - 
-          runoff_trans_mm - 
-          runoff_sheet_mm;
+          priorInc[predictKeyX] + 
+          d.rainMm - 
+          runoffDrainMm - 
+          runoffSheetMm;
         const inc = {
           metadata: {
             // priorInc,
-            observe_key_x,
-            observe_key_y,
-            predict_key_x,
-            predict_key_y,
-            runoff_trans_mm_hr_arr,
-            runoff_trans_mm_hr,
-            runoff_trans_mm,
-            runoff_sheet_mm,
-            runoff_trans_mm_total_key,
-            runoff_sheet_mm_total_key,
+            observeKeyX,
+            observeKeyY,
+            predictKeyX,
+            predictKeyY,
+            runoffDrainMmHrArr,
+            runoffDrainMmHr,
+            runoffDrainMm,
+            runoffSheetMm,
+            runoffDrainMmTotalKey,
+            runoffSheetMmTotalKey,
           },
-          rain_mm: d.rain_mm,
-          mins_total: d.mins_total,
-          // absorb_delta_mm_total
-          [observe_key_x]: d[observe_key_x],
-          // runoff_trans_mm_hr
-          [observe_key_y]: d[observe_key_y],    
-          // absorb_delta_mm_total_predict_SUBSET
-          [predict_key_x]: storage, 
-          // runoff_trans_mm_hr_predict_SUBSET
-          [predict_key_y]: runoff_trans_mm_hr, 
-          // runoff_trans_mm_total
-          [runoff_trans_mm_total_key] : priorInc[runoff_trans_mm_total_key] + runoff_trans_mm, 
-          // runoff_sheet_mm_total
-          [runoff_sheet_mm_total_key] : priorInc[runoff_sheet_mm_total_key] + runoff_sheet_mm,         
+          rainMm: d.rainMm,
+          minsTotal: d.minsTotal,
+          // absorbDeltaMmTotal
+          [observeKeyX]: d[observeKeyX],
+          // runoffDrainMmHr
+          [observeKeyY]: d[observeKeyY],    
+          // absorbDeltaMmTotalPredictSUBSET
+          [predictKeyX]: storage, 
+          // runoffDrainMmHrPredictSUBSET
+          [predictKeyY]: runoffDrainMmHr, 
+          // runoffDrainMmTotal
+          [runoffDrainMmTotalKey] : priorInc[runoffDrainMmTotalKey] + runoffDrainMm, 
+          // runoffSheetMmTotal
+          [runoffSheetMmTotalKey] : priorInc[runoffSheetMmTotalKey] + runoffSheetMm,         
         };
         priorInc = inc;
         return inc;
@@ -318,24 +320,24 @@ const predictLinearReservoirFromRegression = (settings, observeRegression) => {
   const indexEnd = dataType1WithPrediction.length;
 
   const {
-    runoff_trans_mm_total,
-    runoff_trans_mm_total_predict,
+    runoffDrainMmTotal,
+    runoffDrainMmTotalPredict,
   
-    runoff_trans_peak_rate_mm,
-    runoff_trans_peak_rate_mm_predict,
+    runoffDrainPeakRateMm,
+    runoffDrainPeakRateMmPredict,
   
-    runoff_trans_mean_mm,
-    runoff_trans_mean_mm_predict,
+    runoffDrainMeanMm,
+    runoffDrainMeanMmPredict,
 
-    absorb_peak_mm_total,
-    absorb_peak_mm_total_predict,
+    absorbPeakMmTotal,
+    absorbPeakMmTotalPredict,
   } = getFlowStats({
     regressionMethod,
     dataType1WithPrediction, 
-    observeKeyX: observe_key_x, 
-    predictKeyX: predict_key_x,
-    observeKeyY: observe_key_y, 
-    predictKeyY: predict_key_y,
+    observeKeyX: observeKeyX, 
+    predictKeyX: predictKeyX,
+    observeKeyY: observeKeyY, 
+    predictKeyY: predictKeyY,
     indexStart: 0,
     indexEnd,
   });
@@ -344,17 +346,17 @@ const predictLinearReservoirFromRegression = (settings, observeRegression) => {
     nse,
   } = calcNse({
     dataType1WithPrediction, 
-    observeKeyY: observe_key_y, 
-    predictKeyY: predict_key_y,
+    observeKeyY: observeKeyY, 
+    predictKeyY: predictKeyY,
     indexStart: 0,
     indexEnd,
-    runoff_trans_mean_mm,
+    runoffDrainMeanMm,
   });
 
 
   const predictRegression = {
     subset, 
-    regression_method: regressionMethod,
+    regressionMethod: regressionMethod,
 
     indexStart: 0,
     indexEnd: dataType1.length,
@@ -362,23 +364,23 @@ const predictLinearReservoirFromRegression = (settings, observeRegression) => {
     k,
     n,
     r2,
-    regression_string,
+    regressionString,
     
-    observe_key_x,
-    absorb_peak_mm_total,
-    absorb_peak_mm_total_predict,
-    predict_key_x,
+    observeKeyX,
+    absorbPeakMmTotal,
+    absorbPeakMmTotalPredict,
+    predictKeyX,
 
-    observe_key_y,
-    runoff_trans_mm_total,
-    runoff_trans_mm_total_predict,
-    predict_key_y,
+    observeKeyY,
+    runoffDrainMmTotal,
+    runoffDrainMmTotalPredict,
+    predictKeyY,
 
-    runoff_trans_peak_rate_mm,
-    runoff_trans_peak_rate_mm_predict,
+    runoffDrainPeakRateMm,
+    runoffDrainPeakRateMmPredict,
       
-    runoff_trans_mean_mm,
-    runoff_trans_mean_mm_predict,
+    runoffDrainMeanMm,
+    runoffDrainMeanMmPredict,
 
     nse,
 
